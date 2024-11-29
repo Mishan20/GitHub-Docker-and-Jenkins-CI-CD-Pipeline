@@ -11,21 +11,21 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {  
-                sh 'docker build -t mishan202/nodeapp-cuban:%BUILD_NUMBER% .'
+                sh 'docker build -t mishan202/nodeapp-cuban:${BUILD_NUMBER} .'
             }
         }
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([string(credentialsId: 'test-dockerhubpassword', variable: 'test-docker-psswd')]) {
                     script {
-                        sh "docker login -u mishan202 -p %test-docker-psswd%"
+                        sh "docker login -u mishan202 -p '${test-docker-psswd}'"
                     }
                 }
             }
         }
         stage('Push Image') {
             steps {
-                sh 'docker push mishan202/nodeapp-cuban:%BUILD_NUMBER%'
+                sh "docker push mishan202/nodeapp-cuban:${BUILD_NUMBER}"
             }
         }
     }
