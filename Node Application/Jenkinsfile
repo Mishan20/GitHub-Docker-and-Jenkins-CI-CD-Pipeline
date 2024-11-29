@@ -1,6 +1,11 @@
 pipeline {
     agent any
     
+    environment {
+        DOCKER_PATH = '/usr/local/bin/docker' // Path to Docker binary on macOS
+        DOCKER_TAG = "mishan202/nodeapp-cuban:${BUILD_NUMBER}" // Docker image tag
+    }
+
     stages {
         stage('SCM Checkout') {
             steps {
@@ -11,27 +16,28 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t mishan202/nodeapp-cuban:${BUILD_NUMBER} .'
+                sh '${DOCKER_PATH} build -t ${DOCKER_TAG} .'
             }
         }
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([string(credentialsId: 'test-dockerhubpassword', variable: 'testdockerpsswd')]) {
-                    script {  
-                        sh "docker login -u mishan202 -p '${testdockerpsswd}'"
+                    script {
+                        sh "${DOCKER_PATH} login -u mishan202 -p '${testdockerpsswd}'"
                     }
                 }
             }
         }
         stage('Push Image') {
             steps {
-                sh "docker push mishan202/nodeapp-cuban:${BUILD_NUMBER}"
+                sh "${DOCKER_PATH} push ${DOCKER_TAG}"
             }
         }
     }
+
     post {
         always {
-            sh 'docker logout'
+            sh '${DOCKER_PATH} logout || echo "Logout failed (non-critical)"'
         }
     }
 }
