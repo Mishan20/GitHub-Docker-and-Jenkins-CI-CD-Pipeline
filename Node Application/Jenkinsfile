@@ -1,6 +1,8 @@
 pipeline {
     agent any
-    
+    environment {
+        DOCKER_TAG = 'mishan202/nodeapp:v1' // Replace with your Docker image tag
+    }
 
     stages {
         stage('SCM Checkout') {
@@ -12,28 +14,26 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh '${DOCKER_PATH} build -t ${DOCKER_TAG} .'
+                sh 'docker build -t ${DOCKER_TAG} .'
             }
         }
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([string(credentialsId: 'test-dockerhubpassword', variable: 'testdockerpsswd')]) {
-                    script {
-                        sh "${DOCKER_PATH} login -u mishan202 -p '${testdockerpsswd}'"
-                    }
+                    sh 'docker login -u mishan202 -p ${testdockerpsswd}'
                 }
             }
         }
         stage('Push Image') {
             steps {
-                sh "${DOCKER_PATH} push ${DOCKER_TAG}"
+                sh 'docker push ${DOCKER_TAG}'
             }
         }
     }
 
     post {
         always {
-            sh '${DOCKER_PATH} logout || echo "Logout failed (non-critical)"'
+            sh 'docker logout || echo "Logout failed (non-critical)"'
         }
     }
 }
