@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh '/usr/local/bin/docker build -t mishan202/nodeapp-cuban:${BUILD_NUMBER} .'
+                sh 'docker build -t mishan202/nodeapp-cuban:${BUILD_NUMBER} .'
             }
         }
     }
